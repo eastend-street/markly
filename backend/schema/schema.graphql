@@ -1,0 +1,112 @@
+scalar Time
+
+type User {
+  id: ID!
+  email: String!
+  username: String!
+  createdAt: Time!
+  updatedAt: Time!
+  collections: [Collection!]!
+}
+
+type Collection {
+  id: ID!
+  name: String!
+  description: String
+  color: String
+  userId: ID!
+  user: User!
+  bookmarks: [Bookmark!]!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type Bookmark {
+  id: ID!
+  title: String!
+  url: String!
+  description: String
+  notes: String
+  favicon: String
+  screenshot: String
+  tags: [String!]
+  collectionId: ID!
+  collection: Collection!
+  userId: ID!
+  user: User!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+input RegisterInput {
+  email: String!
+  username: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input CreateCollectionInput {
+  name: String!
+  description: String
+  color: String
+}
+
+input UpdateCollectionInput {
+  name: String
+  description: String
+  color: String
+}
+
+input CreateBookmarkInput {
+  title: String!
+  url: String!
+  description: String
+  notes: String
+  tags: [String!]
+  collectionId: ID!
+}
+
+input UpdateBookmarkInput {
+  title: String
+  url: String
+  description: String
+  notes: String
+  tags: [String!]
+  collectionId: ID
+}
+
+input BookmarkFilter {
+  search: String
+  tags: [String!]
+  collectionId: ID
+}
+
+type Query {
+  me: User
+  collections: [Collection!]!
+  collection(id: ID!): Collection
+  bookmarks(filter: BookmarkFilter, limit: Int, offset: Int): [Bookmark!]!
+  bookmark(id: ID!): Bookmark
+}
+
+type Mutation {
+  register(input: RegisterInput!): AuthPayload!
+  login(input: LoginInput!): AuthPayload!
+  
+  createCollection(input: CreateCollectionInput!): Collection!
+  updateCollection(id: ID!, input: UpdateCollectionInput!): Collection!
+  deleteCollection(id: ID!): Boolean!
+  
+  createBookmark(input: CreateBookmarkInput!): Bookmark!
+  updateBookmark(id: ID!, input: UpdateBookmarkInput!): Bookmark!
+  deleteBookmark(id: ID!): Boolean!
+}
