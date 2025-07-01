@@ -1,0 +1,17 @@
+**/.git
+**/.gitignore
+**/README.md
+**/Dockerfile
+**/docker-compose.yml
+**/.env
+**/.env.local
+**/.env.*.local
+**/node_modules
+**/.next
+**/coverage
+**/.coverage
+**/.nyc_output
+**/.cache
+**/dist
+**/.DS_Store
+**/Thumbs.db
