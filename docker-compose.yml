@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: markly-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-markly}
+      MYSQL_USER: ${MYSQL_USER:-markly}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-marklypassword}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - markly-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: markly-backend
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=${MYSQL_USER:-markly}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-marklypassword}
+      - DB_NAME=${MYSQL_DATABASE:-markly}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - SERVER_PORT=8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - markly-network
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: markly-frontend
+    environment:
+      - NEXT_PUBLIC_GRAPHQL_URL=http://localhost:8080/graphql
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - markly-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  markly-network:
+    driver: bridge
