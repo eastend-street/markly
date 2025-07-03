@@ -25,11 +25,12 @@ export const BOOKMARK_CARD_FRAGMENT = `
 
 interface BookmarkCardProps {
   bookmark: Bookmark;
-  onEdit: (bookmark: Bookmark) => void;
+  onEdit?: (bookmark: Bookmark) => void;
   onSelect: (bookmark: Bookmark) => void;
+  showActions?: boolean;
 }
 
-export default function BookmarkCard({ bookmark, onEdit, onSelect }: BookmarkCardProps) {
+export default function BookmarkCard({ bookmark, onEdit, onSelect, showActions = true }: BookmarkCardProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -129,46 +130,50 @@ export default function BookmarkCard({ bookmark, onEdit, onSelect }: BookmarkCar
             </div>
           </div>
 
-          <div className="relative ml-4">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              disabled={isDeleting}
-              className="p-1 text-gray-400 hover:text-gray-600 focus:outline-none disabled:opacity-50"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-              </svg>
-            </button>
+          {showActions && (
+            <div className="relative ml-4">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                disabled={isDeleting}
+                className="p-1 text-gray-400 hover:text-gray-600 focus:outline-none disabled:opacity-50"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                </svg>
+              </button>
 
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
-                <div className="py-1">
-                  <button
-                    onClick={handleVisit}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Visit Link
-                  </button>
-                  <button
-                    onClick={() => {
-                      onEdit(bookmark);
-                      setShowMenu(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Edit Bookmark
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 disabled:opacity-50"
-                  >
-                    {isDeleting ? 'Deleting...' : 'Delete Bookmark'}
-                  </button>
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
+                  <div className="py-1">
+                    <button
+                      onClick={handleVisit}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Visit Link
+                    </button>
+                    {onEdit && (
+                      <button
+                        onClick={() => {
+                          onEdit(bookmark);
+                          setShowMenu(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Edit Bookmark
+                      </button>
+                    )}
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 disabled:opacity-50"
+                    >
+                      {isDeleting ? 'Deleting...' : 'Delete Bookmark'}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
