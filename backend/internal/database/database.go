@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -21,14 +22,47 @@ func Connect(cfg *config.DatabaseConfig) (*gorm.DB, error) {
 		cfg.Name,
 	)
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	})
+	// Retry connection with exponential backoff
+	var db *gorm.DB
+	var err error
+	maxRetries := 10
+	baseDelay := 1 * time.Second
+
+	for i := 0; i < maxRetries; i++ {
+		log.Printf("Attempting database connection (attempt %d/%d)...", i+1, maxRetries)
+		
+		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
+		
+		if err == nil {
+			// Test the connection
+			sqlDB, sqlErr := db.DB()
+			if sqlErr == nil {
+				pingErr := sqlDB.Ping()
+				if pingErr == nil {
+					log.Println("Database connection successful!")
+					break
+				}
+				err = pingErr
+			} else {
+				err = sqlErr
+			}
+		}
+
+		if i < maxRetries-1 {
+			delay := time.Duration(i+1) * baseDelay
+			log.Printf("Database connection failed: %v. Retrying in %v...", err, delay)
+			time.Sleep(delay)
+		}
+	}
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
+		return nil, fmt.Errorf("failed to connect to database after %d attempts: %w", maxRetries, err)
 	}
 
 	// Auto migrate the schema
+	log.Println("Running database migrations...")
 	if err := db.AutoMigrate(
 		&models.User{},
 		&models.Collection{},
