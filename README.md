@@ -48,8 +48,9 @@ A modern bookmark manager built with Next.js, Go, and GraphQL - similar to Raind
 git clone <repository-url>
 cd markly
 
-# Copy environment variables
+# Copy and configure environment variables
 cp .env.example .env
+# Edit .env file with your preferred settings
 
 # Start all services
 docker-compose up -d
@@ -57,12 +58,16 @@ docker-compose up -d
 # Access the application
 # Frontend: http://localhost:3000
 # Backend: http://localhost:8080
-# GraphQL: http://localhost:8080/graphql
+# GraphQL Playground: http://localhost:8080
 ```
 
 ### Local Development
 ```bash
-# Start database
+# Copy and configure environment variables
+cp .env.example .env
+# Edit .env to use local development settings (DB_HOST=localhost)
+
+# Start database only
 docker-compose up -d mysql
 
 # Start backend
