@@ -51,16 +51,20 @@ services:
       dockerfile: Dockerfile
     container_name: markly-frontend
     environment:
-      - NEXT_PUBLIC_GRAPHQL_URL=http://localhost:8080/graphql
+      # GraphQL URL for browser requests (external)
+      - NEXT_PUBLIC_GRAPHQL_URL=${NEXT_PUBLIC_GRAPHQL_URL:-http://localhost:8080/graphql}
+      # GraphQL URL for server-side requests (internal Docker network)
+      - GRAPHQL_INTERNAL_URL=http://backend:8080/graphql
     ports:
       - "3000:3000"
     depends_on:
       - backend
     networks:
       - markly-network
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+    # Note: Remove volume mounts for production Docker builds
+    # volumes:
+    #   - ./frontend:/app
+    #   - /app/node_modules
     restart: unless-stopped
 
 volumes:

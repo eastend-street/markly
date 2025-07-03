@@ -5,7 +5,8 @@ import { revalidatePath } from 'next/cache';
 import { CreateBookmarkInput, UpdateBookmarkInput, BookmarkFilter, Bookmark } from '@/types';
 import { BOOKMARK_CORE_FRAGMENT, BOOKMARK_WITH_COLLECTION_FRAGMENT } from '@/lib/graphql/fragments';
 
-const GRAPHQL_URL = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8080/graphql';
+// For server actions, use internal Docker network URL or localhost for local dev
+const GRAPHQL_URL = process.env.GRAPHQL_INTERNAL_URL || process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8080/graphql';
 
 async function getAuthHeaders() {
   const cookieStore = await cookies();
