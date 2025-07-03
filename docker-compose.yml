@@ -13,7 +13,6 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./backend/migrations:/docker-entrypoint-initdb.d
     networks:
       - markly-network
     healthcheck:
@@ -41,8 +40,9 @@ services:
         condition: service_healthy
     networks:
       - markly-network
-    volumes:
-      - ./backend:/app
+    # Note: Remove volume mounts for production Docker builds
+    # volumes:
+    #   - ./backend:/app
     restart: unless-stopped
 
   frontend:
