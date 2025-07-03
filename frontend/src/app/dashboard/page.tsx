@@ -133,7 +133,7 @@ export default function Dashboard() {
               </button>
 
               <button
-                onClick={() => console.log('Add bookmark - TODO')}
+                onClick={() => router.push('/bookmarks')}
                 className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex-shrink-0">
