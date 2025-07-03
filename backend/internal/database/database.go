@@ -40,3 +40,13 @@ func Connect(cfg *config.DatabaseConfig) (*gorm.DB, error) {
 	log.Println("Database connected and migrated successfully")
 	return db, nil
 }
+
+var globalDB *gorm.DB
+
+func GetDB() *gorm.DB {
+	return globalDB
+}
+
+func SetDB(db *gorm.DB) {
+	globalDB = db
+}

@@ -15,6 +15,7 @@ import (
 type contextKey string
 
 const UserContextKey contextKey = "user"
+const UserIDKey contextKey = "user_id"
 
 type JWTClaims struct {
 	UserID   uint   `json:"user_id"`
@@ -52,6 +53,7 @@ func AuthMiddleware(cfg *config.JWTConfig) func(http.Handler) http.Handler {
 			}
 
 			ctx := context.WithValue(r.Context(), UserContextKey, user)
+			ctx = context.WithValue(ctx, UserIDKey, claims.UserID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
