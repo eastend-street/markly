@@ -150,7 +150,7 @@ export default function Dashboard() {
               </button>
 
               <button
-                onClick={() => console.log('Search bookmarks - TODO')}
+                onClick={() => router.push('/search')}
                 className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex-shrink-0">

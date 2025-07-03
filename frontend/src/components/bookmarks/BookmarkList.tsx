@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Bookmark, Collection, BookmarkFilter } from '@/types';
 import { getBookmarks } from '@/lib/actions/bookmarks';
 import BookmarkCard, { BOOKMARK_CARD_FRAGMENT } from './BookmarkCard';
@@ -21,6 +21,7 @@ interface BookmarkListProps {
   collections: Collection[];
   filter?: BookmarkFilter;
   showAddButton?: boolean;
+  showSearch?: boolean;
   onSelectBookmark?: (bookmark: Bookmark) => void;
 }
 
@@ -29,6 +30,7 @@ export default function BookmarkList({
   collections, 
   filter,
   showAddButton = true,
+  showSearch = true,
   onSelectBookmark 
 }: BookmarkListProps) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks);
@@ -36,12 +38,21 @@ export default function BookmarkList({
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCollection, setSelectedCollection] = useState('');
 
-  const fetchBookmarks = async () => {
+  const fetchBookmarks = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await getBookmarks(filter);
+      // Combine props filter with local search filters
+      const combinedFilter: BookmarkFilter = {
+        ...filter,
+        ...(searchTerm.trim() && { search: searchTerm.trim() }),
+        ...(selectedCollection && { collectionId: selectedCollection })
+      };
+      
+      const result = await getBookmarks(combinedFilter);
       if (result.success && result.data) {
         setBookmarks(result.data);
       } else {
@@ -52,13 +63,17 @@ export default function BookmarkList({
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, searchTerm, selectedCollection]);
 
   useEffect(() => {
     if (initialBookmarks.length === 0) {
-      fetchBookmarks();
+      const timer = setTimeout(() => {
+        fetchBookmarks();
+      }, 300); // Debounce search
+      
+      return () => clearTimeout(timer);
     }
-  }, [filter, initialBookmarks.length, fetchBookmarks]);
+  }, [filter, initialBookmarks.length, searchTerm, selectedCollection, fetchBookmarks]);
 
   const handleFormSuccess = () => {
     setShowForm(false);
@@ -127,6 +142,57 @@ export default function BookmarkList({
           </button>
         )}
       </div>
+
+      {showSearch && (
+        <div className="bg-white rounded-lg shadow-sm p-4 border">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Search Input */}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search bookmarks..."
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              />
+            </div>
+
+            {/* Collection Filter */}
+            <select
+              value={selectedCollection}
+              onChange={(e) => setSelectedCollection(e.target.value)}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            >
+              <option value="">All collections</option>
+              {collections.map((collection) => (
+                <option key={collection.id} value={collection.id}>
+                  {collection.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Clear Search */}
+          {(searchTerm || selectedCollection) && (
+            <div className="mt-3 flex justify-end">
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedCollection('');
+                }}
+                className="text-sm text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {(showForm || editingBookmark) && (
         <BookmarkForm
