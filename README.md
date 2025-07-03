@@ -52,6 +52,9 @@ cd markly
 cp .env.example .env
 # Edit .env file with your preferred settings
 
+# Test Docker setup (optional but recommended)
+./docker-test.sh
+
 # Start all services
 docker-compose up -d
 
@@ -60,6 +63,19 @@ docker-compose up -d
 # Backend: http://localhost:8080
 # GraphQL Playground: http://localhost:8080
 ```
+
+### Docker Troubleshooting
+If you encounter issues with `docker-compose up`:
+
+1. **Clean rebuild**: `docker-compose down -v && docker-compose up -d --build`
+2. **Check logs**: `docker-compose logs -f [service-name]`
+3. **Verify environment**: Ensure `.env` file exists and has correct values
+4. **Run test script**: `./docker-test.sh` to diagnose issues
+
+Common solutions:
+- **Port conflicts**: Change ports in `docker-compose.yml` if 3000/8080/3306 are in use
+- **Build failures**: Check Docker daemon is running and has sufficient resources
+- **Network issues**: Restart Docker daemon or try `docker system prune`
 
 ### Local Development
 ```bash
