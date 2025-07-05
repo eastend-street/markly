@@ -10,7 +10,7 @@ services:
       MYSQL_USER: ${MYSQL_USER:-markly}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-marklypassword}
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
