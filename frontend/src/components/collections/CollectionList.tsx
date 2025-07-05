@@ -115,14 +115,15 @@ export default function CollectionList({ onSelectCollection }: CollectionListPro
   const collections = data?.collections || [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Your Collections</h2>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Your Collections</h2>
         <button
           onClick={() => setShowForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="bg-blue-600 text-white px-4 py-3 sm:py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base font-medium touch-target w-full sm:w-auto"
         >
-          New Collection
+          <span className="sm:hidden">+ New Collection</span>
+          <span className="hidden sm:inline">New Collection</span>
         </button>
       </div>
 
@@ -145,13 +146,13 @@ export default function CollectionList({ onSelectCollection }: CollectionListPro
           <p className="text-gray-600 mb-4">Create your first collection to start organizing your bookmarks.</p>
           <button
             onClick={() => setShowForm(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-3 sm:py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 touch-target"
           >
             Create Your First Collection
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {collections.map((collection: Collection) => (
             <CollectionCard
               key={collection.id}
