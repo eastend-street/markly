@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -28,6 +29,13 @@ func main() {
 	}
 	database.SetDB(db)
 
+	// Create images directory if it doesn't exist
+	imagesDir := "/tmp/markly/images"
+	if err := os.MkdirAll(imagesDir, 0755); err != nil {
+		log.Printf("Warning: Failed to create images directory: %v", err)
+		imagesDir = "/tmp" // Fallback to tmp directory
+	}
+
 	// Initialize router
 	r := chi.NewRouter()
 
@@ -43,6 +51,10 @@ func main() {
 		MaxAge:           300,
 	}).Handler)
 	r.Use(auth.AuthMiddleware(&cfg.JWT))
+
+	// Static file serving for images
+	fileServer := http.FileServer(http.Dir(imagesDir))
+	r.Handle("/images/*", http.StripPrefix("/images/", fileServer))
 
 	// Health check endpoint
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {

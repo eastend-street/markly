@@ -65,7 +65,20 @@ export default function BookmarkCard({ bookmark, onEdit, onSelect, showActions =
   };
 
   return (
-    <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200">
+    <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 overflow-hidden">
+      {bookmark.screenshot && (
+        <div className="h-32 bg-gray-100 overflow-hidden">
+          <img 
+            src={bookmark.screenshot} 
+            alt={`Preview of ${bookmark.title}`}
+            className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+            onClick={() => onSelect(bookmark)}
+            onError={(e) => {
+              e.currentTarget.parentElement?.remove();
+            }}
+          />
+        </div>
+      )}
       <div className="p-4">
         <div className="flex items-start justify-between">
           <div 
@@ -73,16 +86,30 @@ export default function BookmarkCard({ bookmark, onEdit, onSelect, showActions =
             onClick={() => onSelect(bookmark)}
           >
             <div className="flex items-center mb-2">
-              {bookmark.favicon && (
-                <img 
-                  src={bookmark.favicon} 
-                  alt="" 
-                  className="w-4 h-4 mr-2 flex-shrink-0"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              )}
+              <div className="w-4 h-4 mr-2 flex-shrink-0 flex items-center justify-center">
+                {bookmark.favicon ? (
+                  <img 
+                    src={bookmark.favicon} 
+                    alt="" 
+                    className="w-4 h-4 object-contain"
+                    onError={(e) => {
+                      // Fallback to default globe icon
+                      e.currentTarget.style.display = 'none';
+                      const parent = e.currentTarget.parentElement;
+                      if (parent && !parent.querySelector('.fallback-icon')) {
+                        const fallbackIcon = document.createElement('div');
+                        fallbackIcon.className = 'fallback-icon w-4 h-4 rounded bg-gray-200 flex items-center justify-center text-gray-500 text-xs';
+                        fallbackIcon.innerHTML = '🌐';
+                        parent.appendChild(fallbackIcon);
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="w-4 h-4 rounded bg-gray-200 flex items-center justify-center text-gray-500 text-xs">
+                    🌐
+                  </div>
+                )}
+              </div>
               <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600 line-clamp-2">
                 {bookmark.title}
               </h3>

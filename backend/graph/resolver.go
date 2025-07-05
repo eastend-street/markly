@@ -2,6 +2,7 @@ package graph
 
 import (
 	"markly-backend/internal/database"
+	"markly-backend/internal/services"
 	"gorm.io/gorm"
 )
 
@@ -10,12 +11,15 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct{
-	DB *gorm.DB
+	DB                  *gorm.DB
+	ImageCaptureService *services.ImageCaptureService
 }
 
 func NewResolver() *Resolver {
 	db := database.GetDB()
+	imageCaptureService := services.NewImageCaptureService("/tmp/markly/images", "http://localhost:8080")
 	return &Resolver{
-		DB: db,
+		DB:                  db,
+		ImageCaptureService: imageCaptureService,
 	}
 }

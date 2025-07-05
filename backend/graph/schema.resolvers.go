@@ -224,6 +224,26 @@ func (r *mutationResolver) CreateBookmark(ctx context.Context, input model.Creat
 		return nil, err
 	}
 
+	// Capture images asynchronously (non-blocking)
+	go func() {
+		if r.ImageCaptureService != nil {
+			result := r.ImageCaptureService.CaptureImages(input.URL)
+			
+			// Update bookmark with captured images
+			updateData := map[string]interface{}{}
+			if result.FaviconURL != nil {
+				updateData["favicon"] = *result.FaviconURL
+			}
+			if result.ScreenshotURL != nil {
+				updateData["screenshot"] = *result.ScreenshotURL
+			}
+			
+			if len(updateData) > 0 {
+				r.DB.Model(&bookmark).Updates(updateData)
+			}
+		}
+	}()
+
 	return &model.Bookmark{
 		ID:           strconv.FormatUint(uint64(bookmark.ID), 10),
 		Title:        bookmark.Title,
