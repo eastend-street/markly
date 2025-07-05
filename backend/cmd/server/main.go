@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -14,7 +15,7 @@ import (
 
 	"markly-backend/internal/config"
 	"markly-backend/internal/database"
-	auth "markly-backend/internal/middleware"
+	securitymw "markly-backend/internal/middleware"
 	"markly-backend/graph"
 )
 
@@ -39,18 +40,39 @@ func main() {
 	// Initialize router
 	r := chi.NewRouter()
 
-	// Middleware
+	// Security Middleware (applied first)
+	r.Use(securitymw.SecurityHeaders())
+	r.Use(securitymw.RequestTimeout(30 * time.Second))
+	r.Use(securitymw.RequestSizeLimit(10 << 20)) // 10MB limit
+	r.Use(securitymw.InputSanitizer())
+	
+	// Standard Middleware
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.Compress(5))
+	
+	// Rate Limiting
+	r.Use(securitymw.RateLimiter(1000)) // 1000 requests per minute globally
+	
+	// CORS Configuration
+	allowedOrigins := []string{"http://localhost:3000"}
+	if os.Getenv("ENVIRONMENT") == "production" {
+		allowedOrigins = []string{"https://markly.app"} // Replace with your production domain
+	}
+	
 	r.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
+		AllowedOrigins:   allowedOrigins,
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-Requested-With"},
+		ExposedHeaders:   []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           300,
 	}).Handler)
-	r.Use(auth.AuthMiddleware(&cfg.JWT))
+	
+	// Authentication Middleware
+	r.Use(securitymw.AuthMiddleware(&cfg.JWT))
 
 	// Static file serving for images
 	fileServer := http.FileServer(http.Dir(imagesDir))
@@ -66,9 +88,16 @@ func main() {
 	resolver := graph.NewResolver()
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 	
-	// GraphQL endpoints
-	r.Handle("/graphql", srv)
-	r.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
+	// GraphQL endpoints with additional rate limiting
+	r.Route("/graphql", func(r chi.Router) {
+		r.Use(securitymw.GraphQLRateLimiter())
+		r.Handle("/", srv)
+	})
+	
+	// Disable GraphQL playground in production
+	if os.Getenv("ENVIRONMENT") != "production" {
+		r.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
+	}
 
 	log.Printf("Server starting on port %s", cfg.Server.Port)
 	log.Printf("GraphQL endpoint available at http://localhost:%s/graphql", cfg.Server.Port)
