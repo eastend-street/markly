@@ -103,3 +103,95 @@ export const DELETE_COLLECTION_MUTATION = gql`
     deleteCollection(id: $id)
   }
 `;
+
+export const GET_BOOKMARKS_QUERY = gql`
+  query GetBookmarks($filter: BookmarkFilter, $limit: Int, $offset: Int) {
+    bookmarks(filter: $filter, limit: $limit, offset: $offset) {
+      id
+      title
+      url
+      description
+      notes
+      favicon
+      screenshot
+      tags
+      collectionId
+      userId
+      createdAt
+      updatedAt
+      collection {
+        id
+        name
+        color
+      }
+    }
+  }
+`;
+
+export const GET_BOOKMARK_QUERY = gql`
+  query GetBookmark($id: ID!) {
+    bookmark(id: $id) {
+      id
+      title
+      url
+      description
+      notes
+      favicon
+      screenshot
+      tags
+      collectionId
+      userId
+      createdAt
+      updatedAt
+      collection {
+        id
+        name
+        color
+      }
+    }
+  }
+`;
+
+export const CREATE_BOOKMARK_MUTATION = gql`
+  mutation CreateBookmark($input: CreateBookmarkInput!) {
+    createBookmark(input: $input) {
+      id
+      title
+      url
+      description
+      notes
+      favicon
+      screenshot
+      tags
+      collectionId
+      userId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_BOOKMARK_MUTATION = gql`
+  mutation UpdateBookmark($id: ID!, $input: UpdateBookmarkInput!) {
+    updateBookmark(id: $id, input: $input) {
+      id
+      title
+      url
+      description
+      notes
+      favicon
+      screenshot
+      tags
+      collectionId
+      userId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_BOOKMARK_MUTATION = gql`
+  mutation DeleteBookmark($id: ID!) {
+    deleteBookmark(id: $id)
+  }
+`;
