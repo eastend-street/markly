@@ -17,7 +17,7 @@ type Resolver struct{
 
 func NewResolver() *Resolver {
 	db := database.GetDB()
-	imageCaptureService := services.NewImageCaptureService("/tmp/markly/images", "http://localhost:8080")
+	imageCaptureService := services.NewImageCaptureService("/tmp/markly/images", "http://localhost:8081")
 	return &Resolver{
 		DB:                  db,
 		ImageCaptureService: imageCaptureService,

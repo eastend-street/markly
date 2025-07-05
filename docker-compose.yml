@@ -10,7 +10,7 @@ services:
       MYSQL_USER: ${MYSQL_USER:-markly}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-marklypassword}
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -34,7 +34,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
       - SERVER_PORT=8080
     ports:
-      - "8080:8080"
+      - "8081:8080"
     depends_on:
       mysql:
         condition: service_healthy
@@ -52,7 +52,7 @@ services:
     container_name: markly-frontend
     environment:
       # GraphQL URL for browser requests (external)
-      - NEXT_PUBLIC_GRAPHQL_URL=${NEXT_PUBLIC_GRAPHQL_URL:-http://localhost:8080/graphql}
+      - NEXT_PUBLIC_GRAPHQL_URL=${NEXT_PUBLIC_GRAPHQL_URL:-http://localhost:8081/graphql}
       # GraphQL URL for server-side requests (internal Docker network)
       - GRAPHQL_INTERNAL_URL=http://backend:8080/graphql
     ports:

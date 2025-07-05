@@ -1,3 +1,4 @@
+// Updated for new port configuration: Backend on 8081, Frontend on 3000
 const { chromium } = require('playwright');
 
 (async () => {

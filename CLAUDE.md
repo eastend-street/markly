@@ -8,6 +8,11 @@ Markly is a modern bookmark manager similar to Raindrop.io, built with Next.js, 
 - **Backend**: Go with GraphQL (gqlgen), MySQL, JWT auth, Chi router
 - **Infrastructure**: Docker, Docker Compose, MySQL 8.0
 
+## Port Configuration
+- **Frontend**: http://localhost:3000
+- **Backend/GraphQL**: http://localhost:8081
+- **MySQL**: localhost:3308 (external), 3306 (internal)
+
 ## Development Commands
 ```bash
 # Start all services
