@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_COLLECTIONS_QUERY } from '@/lib/graphql/queries';
 import BookmarkList from '@/components/bookmarks/BookmarkList';
+import MobileHeader from '@/components/layout/MobileHeader';
 
 export default function BookmarksPage() {
   const { user, logout, loading, isAuthenticated } = useAuth();
@@ -41,37 +42,14 @@ export default function BookmarksPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => router.push('/dashboard')}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button>
-              <h1 className="text-2xl font-bold text-gray-900">Bookmarks</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user?.username}!</span>
-              <button
-                onClick={logout}
-                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <MobileHeader 
+        title="Bookmarks" 
+        showBackButton={true} 
+        backUrl="/dashboard" 
+      />
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <BookmarkList collections={collections} />
-        </div>
+      <main className="max-w-7xl mx-auto py-4 sm:py-6 px-3 sm:px-6 lg:px-8">
+        <BookmarkList collections={collections} />
       </main>
     </div>
   );
