@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Collection, Bookmark, BookmarkFilter } from '@/types';
 import { getBookmarks } from '@/lib/actions/bookmarks';
-import BookmarkCard from '@/components/bookmarks/BookmarkCard';
+import SearchResultCard from './SearchResultCard';
 import SearchFilters from './SearchFilters';
 
 interface SearchInterfaceProps {
@@ -117,9 +117,18 @@ export default function SearchInterface({ collections }: SearchInterfaceProps) {
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchInputChange(e.target.value)}
+            onFocus={handleSearchInputFocus}
             placeholder="Search bookmarks..."
-            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
+          />
+          <SearchSuggestions
+            searchTerm={searchTerm}
+            history={history}
+            onSelectSuggestion={handleSelectSuggestion}
+            onRemoveFromHistory={removeFromHistory}
+            showSuggestions={showSuggestions}
+            onCloseSuggestions={() => setShowSuggestions(false)}
           />
         </div>
 
@@ -165,7 +174,7 @@ export default function SearchInterface({ collections }: SearchInterfaceProps) {
             <p className="text-gray-600 mb-4">{error}</p>
             <button
               onClick={searchBookmarks}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="bg-blue-600 text-white px-4 py-3 sm:py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 touch-target"
             >
               Try Again
             </button>
@@ -188,13 +197,13 @@ export default function SearchInterface({ collections }: SearchInterfaceProps) {
 
             {/* Results Grid */}
             {bookmarks.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {bookmarks.map((bookmark) => (
-                  <BookmarkCard
+                  <SearchResultCard
                     key={bookmark.id}
                     bookmark={bookmark}
+                    searchTerm={searchTerm}
                     onSelect={handleSelectBookmark}
-                    showActions={false} // Hide edit/delete in search results
                   />
                 ))}
               </div>
