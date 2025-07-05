@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"markly-backend/graph/model"
 	"markly-backend/internal/middleware"
 	"markly-backend/internal/models"
@@ -17,22 +18,31 @@ import (
 
 // Register is the resolver for the register field.
 func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInput) (*model.AuthPayload, error) {
+	// Validate input
+	if err := utils.ValidateRegisterInput(input.Email, input.Username, input.Password); err != nil {
+		return nil, err
+	}
+	
+	// Sanitize input
+	email := strings.ToLower(strings.TrimSpace(input.Email))
+	username := utils.SanitizeString(input.Username)
+	
 	// Check if user already exists
 	var existingUser models.User
-	if err := r.DB.Where("email = ? OR username = ?", input.Email, input.Username).First(&existingUser).Error; err == nil {
-		return nil, errors.New("user already exists")
+	if err := r.DB.Where("email = ? OR username = ?", email, username).First(&existingUser).Error; err == nil {
+		return nil, errors.New("user already exists with this email or username")
 	}
 
 	// Hash password
 	hashedPassword, err := utils.HashPassword(input.Password)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to process password")
 	}
 
 	// Create user
 	user := models.User{
-		Email:    input.Email,
-		Username: input.Username,
+		Email:    email,
+		Username: username,
 		Password: hashedPassword,
 	}
 
@@ -60,9 +70,21 @@ func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInp
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*model.AuthPayload, error) {
+	// Validate input
+	if err := utils.ValidateEmail(input.Email); err != nil {
+		return nil, errors.New("invalid email format")
+	}
+	
+	if input.Password == "" {
+		return nil, errors.New("password is required")
+	}
+	
+	// Sanitize email
+	email := strings.ToLower(strings.TrimSpace(input.Email))
+	
 	// Find user by email
 	var user models.User
-	if err := r.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
+	if err := r.DB.Where("email = ?", email).First(&user).Error; err != nil {
 		return nil, errors.New("invalid credentials")
 	}
 
@@ -97,10 +119,27 @@ func (r *mutationResolver) CreateCollection(ctx context.Context, input model.Cre
 		return nil, errors.New("user not authenticated")
 	}
 
+	// Validate input
+	if err := utils.ValidateCollectionName(input.Name); err != nil {
+		return nil, err
+	}
+	
+	if err := utils.ValidateDescription(*input.Description); err != nil {
+		return nil, err
+	}
+	
+	if err := utils.ValidateColor(*input.Color); err != nil {
+		return nil, err
+	}
+	
+	// Sanitize input
+	name := utils.SanitizeString(input.Name)
+	description := utils.SanitizeString(*input.Description)
+	
 	// Create collection
 	collection := models.Collection{
-		Name:        input.Name,
-		Description: input.Description,
+		Name:        name,
+		Description: &description,
 		Color:       input.Color,
 		UserID:      userID,
 	}
@@ -197,6 +236,33 @@ func (r *mutationResolver) CreateBookmark(ctx context.Context, input model.Creat
 		return nil, errors.New("user not authenticated")
 	}
 
+	// Validate input
+	if err := utils.ValidateTitle(input.Title); err != nil {
+		return nil, err
+	}
+	
+	if err := utils.ValidateURL(input.URL); err != nil {
+		return nil, err
+	}
+	
+	if input.Description != nil {
+		if err := utils.ValidateDescription(*input.Description); err != nil {
+			return nil, err
+		}
+	}
+	
+	if input.Notes != nil {
+		if err := utils.ValidateNotes(*input.Notes); err != nil {
+			return nil, err
+		}
+	}
+	
+	if input.Tags != nil {
+		if err := utils.ValidateTags(*input.Tags); err != nil {
+			return nil, err
+		}
+	}
+
 	// Parse collection ID
 	collectionID, err := strconv.ParseUint(input.CollectionID, 10, 64)
 	if err != nil {
@@ -209,13 +275,34 @@ func (r *mutationResolver) CreateBookmark(ctx context.Context, input model.Creat
 		return nil, errors.New("collection not found")
 	}
 
+	// Sanitize input
+	title := utils.SanitizeString(input.Title)
+	url := strings.TrimSpace(input.URL)
+	
+	var description *string
+	if input.Description != nil {
+		sanitized := utils.SanitizeString(*input.Description)
+		description = &sanitized
+	}
+	
+	var notes *string
+	if input.Notes != nil {
+		sanitized := utils.SanitizeString(*input.Notes)
+		notes = &sanitized
+	}
+	
+	var tags []string
+	if input.Tags != nil {
+		tags = utils.SanitizeTags(*input.Tags)
+	}
+
 	// Create bookmark
 	bookmark := models.Bookmark{
-		Title:        input.Title,
-		URL:          input.URL,
-		Description:  input.Description,
-		Notes:        input.Notes,
-		Tags:         input.Tags,
+		Title:        title,
+		URL:          url,
+		Description:  description,
+		Notes:        notes,
+		Tags:         tags,
 		CollectionID: uint(collectionID),
 		UserID:       userID,
 	}
