@@ -101,12 +101,12 @@ export default function BookmarkForm({ bookmark, collections, onSuccess, onCance
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">
+    <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+      <h3 className="text-lg font-medium text-gray-900 mb-4 text-center sm:text-left">
         {bookmark ? 'Edit Bookmark' : 'Add New Bookmark'}
       </h3>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-4">
         <div>
           <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
             URL *
@@ -120,14 +120,14 @@ export default function BookmarkForm({ bookmark, collections, onSuccess, onCance
               onChange={handleChange}
               onBlur={handleUrlBlur}
               required
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="flex-1 px-3 py-3 sm:py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
               placeholder="https://example.com"
             />
             <button
               type="button"
               onClick={handleExtractMetadata}
               disabled={!formData.url || isExtractingMetadata}
-              className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-3 sm:py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed touch-target"
             >
               {isExtractingMetadata ? 'Loading...' : 'Extract'}
             </button>
@@ -145,7 +145,7 @@ export default function BookmarkForm({ bookmark, collections, onSuccess, onCance
             value={formData.title}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
             placeholder="Bookmark title"
           />
         </div>
@@ -160,7 +160,7 @@ export default function BookmarkForm({ bookmark, collections, onSuccess, onCance
             value={formData.collectionId}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
           >
             {collections.map((collection) => (
               <option key={collection.id} value={collection.id}>
@@ -180,7 +180,7 @@ export default function BookmarkForm({ bookmark, collections, onSuccess, onCance
             value={formData.description}
             onChange={handleChange}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
             placeholder="Optional description"
           />
         </div>
@@ -216,18 +216,18 @@ export default function BookmarkForm({ bookmark, collections, onSuccess, onCance
           />
         </div>
 
-        <div className="flex justify-end space-x-3 pt-4">
+        <div className="flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-4 py-3 sm:py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 touch-target"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isLoading || !formData.title.trim() || !formData.url.trim()}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-3 sm:py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed touch-target"
           >
             {isLoading ? 'Saving...' : bookmark ? 'Update Bookmark' : 'Add Bookmark'}
           </button>

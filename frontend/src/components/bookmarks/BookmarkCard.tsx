@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Bookmark } from '@/types';
 import { deleteBookmark } from '@/lib/actions/bookmarks';
+import { useSwipe } from '@/hooks/useSwipe';
 
 // Fragment for this component
 export const BOOKMARK_CARD_FRAGMENT = `
@@ -33,6 +34,7 @@ interface BookmarkCardProps {
 export default function BookmarkCard({ bookmark, onEdit, onSelect, showActions = true }: BookmarkCardProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showSwipeActions, setShowSwipeActions] = useState(false);
 
   const handleDelete = async () => {
     if (window.confirm(`Are you sure you want to delete "${bookmark.title}"?`)) {
@@ -64,8 +66,23 @@ export default function BookmarkCard({ bookmark, onEdit, onSelect, showActions =
     }
   };
 
+  const swipeRef = useSwipe({
+    onSwipeLeft: () => {
+      if (showActions) {
+        setShowSwipeActions(true);
+        setTimeout(() => setShowSwipeActions(false), 3000); // Auto-hide after 3 seconds
+      }
+    },
+    onSwipeRight: () => {
+      setShowSwipeActions(false);
+    }
+  });
+
   return (
-    <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 overflow-hidden">
+    <div 
+      ref={swipeRef}
+      className="bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 overflow-hidden relative"
+    >
       {bookmark.screenshot && (
         <div className="h-32 bg-gray-100 overflow-hidden">
           <img 
@@ -203,6 +220,48 @@ export default function BookmarkCard({ bookmark, onEdit, onSelect, showActions =
           )}
         </div>
       </div>
+
+      {/* Mobile Swipe Actions Overlay */}
+      {showSwipeActions && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center space-x-4 md:hidden">
+          <button
+            onClick={handleVisit}
+            className="bg-blue-600 text-white p-3 rounded-full shadow-lg touch-target"
+            aria-label="Visit link"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </button>
+          {onEdit && (
+            <button
+              onClick={() => {
+                onEdit(bookmark);
+                setShowSwipeActions(false);
+              }}
+              className="bg-green-600 text-white p-3 rounded-full shadow-lg touch-target"
+              aria-label="Edit bookmark"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+          )}
+          <button
+            onClick={() => {
+              handleDelete();
+              setShowSwipeActions(false);
+            }}
+            disabled={isDeleting}
+            className="bg-red-600 text-white p-3 rounded-full shadow-lg touch-target disabled:opacity-50"
+            aria-label="Delete bookmark"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

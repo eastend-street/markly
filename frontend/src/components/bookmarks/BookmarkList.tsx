@@ -128,24 +128,25 @@ export default function BookmarkList({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
           {filter?.collectionId ? 'Collection Bookmarks' : 'Your Bookmarks'}
         </h2>
         {showAddButton && (
           <button
             onClick={() => setShowForm(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="bg-blue-600 text-white px-4 py-3 sm:py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base font-medium touch-target w-full sm:w-auto"
           >
-            Add Bookmark
+            <span className="sm:hidden">+ Add New Bookmark</span>
+            <span className="hidden sm:inline">Add Bookmark</span>
           </button>
         )}
       </div>
 
       {showSearch && (
-        <div className="bg-white rounded-lg shadow-sm p-4 border">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 border">
+          <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
             {/* Search Input */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -158,7 +159,7 @@ export default function BookmarkList({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search bookmarks..."
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="block w-full pl-10 pr-3 py-3 sm:py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
               />
             </div>
 
@@ -166,7 +167,7 @@ export default function BookmarkList({
             <select
               value={selectedCollection}
               onChange={(e) => setSelectedCollection(e.target.value)}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="block w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
             >
               <option value="">All collections</option>
               {collections.map((collection) => (
@@ -179,13 +180,13 @@ export default function BookmarkList({
 
           {/* Clear Search */}
           {(searchTerm || selectedCollection) && (
-            <div className="mt-3 flex justify-end">
+            <div className="mt-3 flex justify-center sm:justify-end">
               <button
                 onClick={() => {
                   setSearchTerm('');
                   setSelectedCollection('');
                 }}
-                className="text-sm text-gray-500 hover:text-gray-700 focus:outline-none"
+                className="text-sm text-gray-500 hover:text-gray-700 focus:outline-none px-3 py-2 touch-target"
               >
                 Clear filters
               </button>
@@ -228,7 +229,7 @@ export default function BookmarkList({
         </div>
       ) : (
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {bookmarks.map((bookmark) => (
               <BookmarkCard
                 key={bookmark.id}
