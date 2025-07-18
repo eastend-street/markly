@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"errors"
 	"html"
 	"regexp"
 	"strings"
