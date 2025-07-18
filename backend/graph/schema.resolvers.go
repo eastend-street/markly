@@ -258,7 +258,7 @@ func (r *mutationResolver) CreateBookmark(ctx context.Context, input model.Creat
 	}
 	
 	if input.Tags != nil {
-		if err := utils.ValidateTags(*input.Tags); err != nil {
+		if err := utils.ValidateTags(input.Tags); err != nil {
 			return nil, err
 		}
 	}
@@ -293,7 +293,7 @@ func (r *mutationResolver) CreateBookmark(ctx context.Context, input model.Creat
 	
 	var tags []string
 	if input.Tags != nil {
-		tags = utils.SanitizeTags(*input.Tags)
+		tags = utils.SanitizeTags(input.Tags)
 	}
 
 	// Create bookmark
