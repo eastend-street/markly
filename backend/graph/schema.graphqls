@@ -12,6 +12,7 @@ type Collection {
   name: String!
   description: String
   color: String
+  position: Int
   userId: ID!
   user: User!
   bookmarks: [Bookmark!]!
@@ -56,12 +57,14 @@ input CreateCollectionInput {
   name: String!
   description: String
   color: String
+  position: Int
 }
 
 input UpdateCollectionInput {
   name: String
   description: String
   color: String
+  position: Int
 }
 
 input CreateBookmarkInput {
@@ -103,6 +106,7 @@ type Mutation {
   createCollection(input: CreateCollectionInput!): Collection!
   updateCollection(id: ID!, input: UpdateCollectionInput!): Collection!
   deleteCollection(id: ID!): Boolean!
+  reorderCollections(collectionIds: [ID!]!): Boolean!
   
   createBookmark(input: CreateBookmarkInput!): Bookmark!
   updateBookmark(id: ID!, input: UpdateBookmarkInput!): Bookmark!

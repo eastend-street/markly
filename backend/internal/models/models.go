@@ -21,6 +21,7 @@ type Collection struct {
 	Name        string    `json:"name" gorm:"not null"`
 	Description *string   `json:"description"`
 	Color       *string   `json:"color"`
+	Position    *int      `json:"position"`
 	UserID      uint      `json:"userId" gorm:"not null"`
 	User        User      `json:"user" gorm:"foreignKey:UserID"`
 	Bookmarks   []Bookmark `json:"bookmarks" gorm:"foreignKey:CollectionID"`

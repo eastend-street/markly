@@ -141,6 +141,7 @@ func (r *mutationResolver) CreateCollection(ctx context.Context, input model.Cre
 		Name:        name,
 		Description: &description,
 		Color:       input.Color,
+		Position:    input.Position,
 		UserID:      userID,
 	}
 
@@ -153,6 +154,7 @@ func (r *mutationResolver) CreateCollection(ctx context.Context, input model.Cre
 		Name:        collection.Name,
 		Description: collection.Description,
 		Color:       collection.Color,
+		Position:    collection.Position,
 		UserID:      strconv.FormatUint(uint64(collection.UserID), 10),
 		CreatedAt:   collection.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:   collection.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
@@ -189,6 +191,9 @@ func (r *mutationResolver) UpdateCollection(ctx context.Context, id string, inpu
 	if input.Color != nil {
 		collection.Color = input.Color
 	}
+	if input.Position != nil {
+		collection.Position = input.Position
+	}
 
 	if err := r.DB.Save(&collection).Error; err != nil {
 		return nil, err
@@ -199,6 +204,7 @@ func (r *mutationResolver) UpdateCollection(ctx context.Context, id string, inpu
 		Name:        collection.Name,
 		Description: collection.Description,
 		Color:       collection.Color,
+		Position:    collection.Position,
 		UserID:      strconv.FormatUint(uint64(collection.UserID), 10),
 		CreatedAt:   collection.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:   collection.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
@@ -226,6 +232,58 @@ func (r *mutationResolver) DeleteCollection(ctx context.Context, id string) (boo
 	}
 
 	return result.RowsAffected > 0, nil
+}
+
+// ReorderCollections is the resolver for the reorderCollections field.
+func (r *mutationResolver) ReorderCollections(ctx context.Context, collectionIds []string) (bool, error) {
+	// Get user from context
+	userID, ok := ctx.Value(middleware.UserIDKey).(uint)
+	if !ok {
+		return false, errors.New("user not authenticated")
+	}
+
+	// Begin transaction
+	tx := r.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return false, err
+	}
+
+	// Update position for each collection
+	for i, collectionIDStr := range collectionIds {
+		collectionID, err := strconv.ParseUint(collectionIDStr, 10, 64)
+		if err != nil {
+			tx.Rollback()
+			return false, errors.New("invalid collection ID")
+		}
+
+		// Verify collection belongs to user and update position
+		result := tx.Model(&models.Collection{}).
+			Where("id = ? AND user_id = ?", collectionID, userID).
+			Update("position", i)
+
+		if result.Error != nil {
+			tx.Rollback()
+			return false, result.Error
+		}
+
+		if result.RowsAffected == 0 {
+			tx.Rollback()
+			return false, errors.New("collection not found or not owned by user")
+		}
+	}
+
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 // CreateBookmark is the resolver for the createBookmark field.
@@ -470,9 +528,9 @@ func (r *queryResolver) Collections(ctx context.Context) ([]*model.Collection, e
 		return nil, errors.New("user not authenticated")
 	}
 
-	// Find collections
+	// Find collections ordered by position, then by creation date
 	var collections []models.Collection
-	if err := r.DB.Where("user_id = ?", userID).Find(&collections).Error; err != nil {
+	if err := r.DB.Where("user_id = ?", userID).Order("position ASC, created_at ASC").Find(&collections).Error; err != nil {
 		return nil, err
 	}
 
@@ -518,6 +576,7 @@ func (r *queryResolver) Collection(ctx context.Context, id string) (*model.Colle
 		Name:        collection.Name,
 		Description: collection.Description,
 		Color:       collection.Color,
+		Position:    collection.Position,
 		UserID:      strconv.FormatUint(uint64(collection.UserID), 10),
 		CreatedAt:   collection.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:   collection.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
