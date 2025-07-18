@@ -8,7 +8,7 @@ import CollectionList from '@/components/collections/CollectionList';
 import MobileHeader from '@/components/layout/MobileHeader';
 
 export default function Collections() {
-  const { user, logout, loading, isAuthenticated } = useAuth();
+  const { loading, isAuthenticated } = useAuth();
   const router = useRouter();
   // const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
 

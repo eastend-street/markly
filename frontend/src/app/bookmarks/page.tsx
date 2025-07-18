@@ -2,14 +2,14 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_COLLECTIONS_QUERY } from '@/lib/graphql/queries';
 import BookmarkList from '@/components/bookmarks/BookmarkList';
 import MobileHeader from '@/components/layout/MobileHeader';
 
-export default function BookmarksPage() {
-  const { user, logout, loading, isAuthenticated } = useAuth();
+function BookmarksPageContent() {
+  const { loading, isAuthenticated } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const collectionId = searchParams.get('collection');
@@ -41,7 +41,7 @@ export default function BookmarksPage() {
   }
 
   const collections = collectionsData?.collections || [];
-  const selectedCollection = collections.find(c => c.id === collectionId);
+  const selectedCollection = collections.find((c: { id: string; name: string }) => c.id === collectionId);
   
   // Create filter based on collection parameter
   const filter = collectionId ? { collectionId } : undefined;
@@ -64,5 +64,20 @@ export default function BookmarksPage() {
         />
       </main>
     </div>
+  );
+}
+
+export default function BookmarksPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <BookmarksPageContent />
+    </Suspense>
   );
 }

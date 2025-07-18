@@ -44,7 +44,7 @@ const authLink = setContext((_, { headers }) => {
         window.location.href = '/auth';
         return { headers };
       }
-    } catch (error) {
+    } catch {
       // Invalid token format, remove it
       localStorage.removeItem('token');
       console.warn('Invalid token format, removing token');
@@ -63,7 +63,7 @@ const authLink = setContext((_, { headers }) => {
 });
 
 // Error handling link
-const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, locations, path }) => {
       console.error(
@@ -100,12 +100,12 @@ export const apolloClient = new ApolloClient({
       Query: {
         fields: {
           bookmarks: {
-            merge(existing = [], incoming: any[]) {
+            merge(_, incoming: unknown[]) {
               return incoming;
             },
           },
           collections: {
-            merge(existing = [], incoming: any[]) {
+            merge(_, incoming: unknown[]) {
               return incoming;
             },
           },
