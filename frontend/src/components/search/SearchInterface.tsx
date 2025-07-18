@@ -5,6 +5,8 @@ import { Collection, Bookmark, BookmarkFilter } from '@/types';
 import { getBookmarks } from '@/lib/actions/bookmarks';
 import SearchResultCard from './SearchResultCard';
 import SearchFilters from './SearchFilters';
+import SearchSuggestions from './SearchSuggestions';
+import { useSearchHistory } from '@/hooks/useSearchHistory';
 
 interface SearchInterfaceProps {
   collections: Collection[];
@@ -18,6 +20,8 @@ export default function SearchInterface({ collections }: SearchInterfaceProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const { history, addToHistory, removeFromHistory } = useSearchHistory();
 
   const searchBookmarks = useCallback(async () => {
     // Don't search if no search criteria
@@ -117,15 +121,19 @@ export default function SearchInterface({ collections }: SearchInterfaceProps) {
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => handleSearchInputChange(e.target.value)}
-            onFocus={handleSearchInputFocus}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onFocus={() => setShowSuggestions(true)}
             placeholder="Search bookmarks..."
             className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
           />
           <SearchSuggestions
             searchTerm={searchTerm}
             history={history}
-            onSelectSuggestion={handleSelectSuggestion}
+            onSelectSuggestion={(term) => {
+              setSearchTerm(term);
+              addToHistory(term);
+              setShowSuggestions(false);
+            }}
             onRemoveFromHistory={removeFromHistory}
             showSuggestions={showSuggestions}
             onCloseSuggestions={() => setShowSuggestions(false)}

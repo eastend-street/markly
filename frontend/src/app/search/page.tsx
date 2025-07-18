@@ -9,7 +9,7 @@ import SearchInterface from '@/components/search/SearchInterface';
 import MobileHeader from '@/components/layout/MobileHeader';
 
 export default function SearchPage() {
-  const { user, logout, loading, isAuthenticated } = useAuth();
+  const { loading, isAuthenticated } = useAuth();
   const router = useRouter();
   
   const { data: collectionsData, loading: collectionsLoading } = useQuery(GET_COLLECTIONS_QUERY, {
